@@ -35,6 +35,6 @@ application {
 
 tasks.jar {
     manifest {
-        attributes["Main-Class"] = "server.App" // Аналогично укажи путь
+        attributes["Main-Class"] = application.mainClass.get()
     }
 }

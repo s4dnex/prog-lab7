@@ -30,11 +30,11 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass = "client.App"
+    mainClass = "client.Main"
 }
 
 tasks.jar {
     manifest {
-        attributes["Main-Class"] = "client.App"
+        attributes["Main-Class"] = application.mainClass.get()
     }
 }
