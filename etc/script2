@@ -1,0 +1,3 @@
+remove_by_id 1
+execute_script etc/script3
+exit

@@ -9,8 +9,24 @@ public class CommandDataManager {
     private static final Map<String, CommandData> commands = new HashMap<String, CommandData>();
 
     static {
-        commands.put(Test.instance.getName(), Test.instance);
-        commands.put(Help.instance.getName(), Help.instance);
+        register(new Add());
+        register(new AddIfMax());
+        register(new Clear());
+        register(new Help());
+        register(new History());
+        register(new Info());
+        register(new PrintFieldAscendingDifficulty());
+        register(new PrintFieldDescendingAuthor());
+        register(new RemoveById());
+        register(new RemoveLower());
+        register(new Show());
+        register(new SumOfMinimalPoint());
+        register(new Test());
+        register(new Update());
+    }
+
+    public static void register(CommandData command) {
+        commands.put(command.getName(), command);
     }
 
     public static boolean has(String name) {

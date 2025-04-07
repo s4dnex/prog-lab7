@@ -89,7 +89,17 @@ public class LabWork implements Comparable<LabWork>, Serializable {
 
     @Override
     public int compareTo(LabWork labWork) {
-        return this.id.compareTo(labWork.id);
+        if (this.difficulty == labWork.difficulty) {
+            if (this.minimalPoint == null && labWork.minimalPoint == null)
+                return 0;
+            else if (this.minimalPoint == null)
+                return -1;
+            else if (labWork.minimalPoint == null)
+                return 1;
+            else return this.minimalPoint.compareTo(labWork.minimalPoint);
+        }
+        else 
+            return this.difficulty.compareTo(labWork.difficulty);
     }
 
     @Override

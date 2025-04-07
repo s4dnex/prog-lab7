@@ -1,9 +1,8 @@
-package client.utils;
+package shared.utils;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import shared.data.*;
-import shared.utils.Formatter;
 
 /**
  * Class to build data for collection.

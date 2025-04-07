@@ -57,8 +57,20 @@ public abstract class CommandData implements Comparable<CommandData>, Serializab
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (this.getClass() != obj.getClass()) 
+            return false;
+
+        CommandData commandData = (CommandData) obj;
+        return name.equals(commandData.name) &&
+               args.length == commandData.args.length && 
+               requiresObject == commandData.requiresObject &&
+               description.equals(commandData.description);
+    }
+
+    @Override
     public String toString() {
-        return "Command {name=" + name + 
+        return "CommandData {name=" + name + 
                 ", args=[" + String.join(", ", args) + 
                 "], requiresObject=" + requiresObject +
                 ", description=" + description + 

@@ -16,7 +16,7 @@ public abstract class Command implements Serializable {
         return name;
     }
 
-    public abstract Response execute(Object obj, String[] args);
+    public abstract Response execute(String[] args, Object obj);
 
     @Override
     public String toString() {

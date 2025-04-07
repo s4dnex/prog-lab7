@@ -5,9 +5,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.ConnectException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketAddress;
+import java.net.SocketTimeoutException;
 import shared.commands.Test;
 import shared.network.*;
 
@@ -22,8 +24,7 @@ public class NetworkManager implements AutoCloseable {
         clientSocket.setSoTimeout(5000);
 
         if (!checkConnection()) {
-            close();
-            throw new IOException("Failed to connect to server");
+            throw new ConnectException("Failed to connect to the server");
         }
     }
 
@@ -36,15 +37,13 @@ public class NetworkManager implements AutoCloseable {
             byte[] data = bytes.toByteArray();
             DatagramPacket packet = new DatagramPacket(data, data.length, serverAddress);
             clientSocket.send(packet);
-        } catch (IOException e) {
-            throw new IOException("Failed to send request", e);
+        } 
+        catch (SocketTimeoutException e) {
+            throw new SocketTimeoutException("Lost connection to the server");
+        } 
+        catch (IOException e) {
+            throw new IOException("Failed to send a request", e);
         }
-
-        // ByteBuffer buffer = ByteBuffer.wrap(data);
-        
-        // while (buffer.hasRemaining()) {
-        //     clientChannel.write(buffer);
-        // }
     }
 
     public Response receive() throws IOException {
@@ -55,14 +54,23 @@ public class NetworkManager implements AutoCloseable {
             ObjectInputStream in = new ObjectInputStream(bytes)
         ) {
             return (Response) in.readObject();
-        } catch (IOException|ClassNotFoundException e) {
-            throw new IOException("Failed to receive response", e);
+        } 
+        catch (SocketTimeoutException e) {
+            throw new SocketTimeoutException("Lost connection to the server");
+        } 
+        catch (IOException|ClassNotFoundException e) {
+            throw new IOException("Failed to receive a response", e);
         }
     }
     
     private boolean checkConnection() throws IOException {
-        send(new Request(Test.instance, new String[0]));
-        return receive().isSuccess();
+        try {
+            send(new Request(new Test(), new String[0]));
+            return receive().isSuccess();    
+        }
+        catch (IOException e) {
+            return false;
+        }
     }
 
     @Override

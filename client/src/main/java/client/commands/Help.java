@@ -1,7 +1,8 @@
 package client.commands;
 
 import java.util.Map;
-import client.utils.Console;
+
+import shared.utils.Console;
 import shared.utils.Formatter;
 
 /**
@@ -32,6 +33,7 @@ public class Help extends Command {
 
         String format = Formatter.getColumnStringFormat(3, minColumnWidth);
         StringBuilder msg = new StringBuilder();
+        msg.append("Client-side commands:\n");
         msg.append(String.format(format, "Command", "Arguments", "Description"));
 
         commands.values()

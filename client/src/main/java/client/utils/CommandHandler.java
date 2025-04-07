@@ -4,45 +4,45 @@ import java.io.IOException;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.Map;
-
-import client.commands.Command;
+import client.commands.*;
 import client.network.NetworkManager;
-import shared.commands.*;
+import shared.commands.CommandData;
+import shared.commands.CommandDataManager;
 import shared.data.LabWork;
-import shared.io.FileHandler;
 import shared.network.*;
+import shared.utils.Console;
+import shared.utils.DataBuilder;
 
 /**
  * Class to register commands and invoke their execution.
  */
-public class Invoker {
+public class CommandHandler {
     private final Console console;
     private final NetworkManager networkManager;
-    private final FileHandler fileHandler;
     private final DataBuilder dataBuilder;
     private final Map<String, Command> commands;
 
     /**
      * @param console Class to handle input and output
-     * @param fileHandler Class to handle files
-     * @param collection Class to store and work with data
+     * @param dataBuilder Class to build data
+     * @param networkManager Class to handle network connection
      */
-    public Invoker(Console console, DataBuilder dataBuilder, NetworkManager networkManager, FileHandler fileHandler) {
+    public CommandHandler(Console console, DataBuilder dataBuilder, NetworkManager networkManager) {
         this.console = console;
         this.dataBuilder = dataBuilder;
         this.networkManager = networkManager;
-        this.fileHandler = fileHandler;
         this.commands = new HashMap<>();
 
-        registerCommand(new client.commands.Help(console, commands));
-        registerCommand(new client.commands.Exit(console));
+        register(new ExecuteScript(console, this));
+        register(new Exit(console));
+        register(new Help(console, commands));
     }
 
     /**
      * Method to register command to allow further execution
      * @param command Command to register
      */
-    private void registerCommand(Command command) {
+    private void register(Command command) {
         commands.put(command.getName(), command);
     }
 
@@ -50,7 +50,7 @@ public class Invoker {
      * Method that parses command, checks if it is valid and sends it to the server.
      * @param command Command to execute
      */
-    public void handle(String command) {
+    public void handle(String command) throws IOException {
         SimpleEntry<String, String[]> commandParts = CommandReader.parse(command);
         String commandName = commandParts.getKey();
         String[] args = commandParts.getValue();
@@ -79,24 +79,14 @@ public class Invoker {
             return;
         }
 
-        try {
-            networkManager.send(createRequest(commandData, args));
-        }
-        catch (IOException e) {
-            console.println("Failed to send request: " + e.getMessage());
-            return;
-        }
-
-        try {
-            Response response = networkManager.receive();
-            if (response.isSuccess()) {
-                console.println(response.getMessage());
-            } 
-            else {
-                console.println("Failed to execute command: " + response.getMessage());
-            }
-        } catch (IOException e) {
-            console.println("Failed to receive response: " + e.getMessage());
+        networkManager.send(createRequest(commandData, args));
+        
+        Response response = networkManager.receive();
+        if (response.isSuccess()) {
+            console.println(response.getMessage());
+        } 
+        else {
+            console.println("Failed to execute command: " + response.getMessage());
         }
     }
 

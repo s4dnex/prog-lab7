@@ -1,13 +1,16 @@
 package client.utils;
 
+import java.io.IOException;
 import java.util.AbstractMap.SimpleEntry;
+
+import shared.utils.Console;
 
 /**
  * Class to read and parse {@link commands.Command}.
  */
 public class CommandReader {
     private final Console console;
-    private final Invoker invoker;
+    private final CommandHandler invoker;
 
     // CONSTRUCTORS
 
@@ -15,7 +18,7 @@ public class CommandReader {
      * @param console Class to handle input and output
      * @param invoker Class to invoke commands execution
      */
-    public CommandReader(Console console, Invoker invoker) {
+    public CommandReader(Console console, CommandHandler invoker) {
         this.console = console;
         this.invoker = invoker;
     }
@@ -44,9 +47,9 @@ public class CommandReader {
     }
 
     /**
-     * Method to enable {@link CommandReader} and pass input to {@link Invoker}.
+     * Method to enable {@link CommandReader} and pass input to {@link CommandHandler}.
      */
-    public void enable() {
+    public void enable() throws IOException {
         console.setInteractiveMode();
 
         while (true) {

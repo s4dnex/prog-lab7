@@ -1,6 +1,6 @@
 package client.commands;
 
-import client.utils.Console;
+import shared.utils.Console;
 
 /**
  * Command to exit the program.

@@ -8,6 +8,7 @@
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     application
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 repositories {
@@ -18,6 +19,9 @@ repositories {
 dependencies {
     // This dependency is used by the application.
     implementation(libs.guava)
+    implementation("com.google.code.gson:gson:2.12.1")
+    implementation("ch.qos.logback:logback-classic:1.4.7")
+    implementation("ch.qos.logback:logback-core:1.4.7")
     implementation(project(":shared"))
 }
 
@@ -30,11 +34,25 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass = "server.App"
+    mainClass = "server.Main"
+}
+
+tasks {
+    withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
+        archiveBaseName.set("server")
+        archiveClassifier.set("")
+        archiveVersion.set("")
+        manifest {
+            attributes["Main-Class"] = "server.Main"
+        }
+    }
+
+    "startScripts" {
+        dependsOn("shadowJar")
+    }
 }
 
 tasks.jar {
-    manifest {
-        attributes["Main-Class"] = application.mainClass.get()
-    }
+    finalizedBy("shadowJar")
+    enabled = false
 }
