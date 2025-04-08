@@ -48,6 +48,7 @@ public class Invoker {
     public Response execute(Request request) {
         String commandName = request.getCommandData().getName();
         if (commands.containsKey(commandName)) {
+            Logback.logger.info("Executing command '" + commandName + "'");
             try {
                 Response response = commands.get(commandName)
                                             .execute(request.getArgs(), request.getCommandObject());
@@ -63,6 +64,7 @@ public class Invoker {
             }
         }
         else {
+            Logback.logger.error("Command '" + commandName + "' not found.");
             return new Response(false, "Command not found. Type 'help' to see available commands.");
         }
     }

@@ -1,6 +1,7 @@
 package client.utils;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.Map;
@@ -79,9 +80,9 @@ public class CommandHandler {
             return;
         }
 
-        networkManager.send(createRequest(commandData, args));
-        
-        Response response = networkManager.receive();
+        Request request = createRequest(commandData, args);
+        Response response = sendAndReceive(request);
+
         if (response.isSuccess()) {
             console.println(response.getMessage());
         } 
@@ -97,5 +98,31 @@ public class CommandHandler {
         }
 
         return new Request(command, args);
+    }
+
+    public Response sendAndReceive(Request request) throws IOException {
+        Response response = null;
+        boolean received = false;
+        int attempts = 0;
+        int maxAttempts = 5;
+
+        while (!received && attempts < maxAttempts) {
+            try {
+                networkManager.send(request);
+                response = networkManager.receive();
+                received = true;
+            } 
+            catch (SocketTimeoutException e) {
+                attempts++;
+                console.println("No response from server (attempt " + attempts + "/" + maxAttempts + "). Retrying...");
+            }
+        }
+
+
+        if (response == null) {
+            throw new SocketTimeoutException("Could not reconnect to the server");
+        }
+
+        return response;
     }
 }

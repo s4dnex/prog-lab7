@@ -22,9 +22,9 @@ public class AddIfMax extends Command {
         }
         
         if (collection.addIfMax((LabWork) obj)) {
-            return new Response(true, "Element added to collection.");
+            return new Response(true, "Element has been added to collection!");
         } else {
-            return new Response(false, "Element not added to collection. It is not greater than any other element.");
+            return new Response(false, "Element has NOT been added to collection. It is not greater than any other element.");
         }
     }
 

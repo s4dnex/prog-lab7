@@ -25,11 +25,11 @@ public class RequestHandler {
                 requests = networkManager.receiveRequests();
             }
             catch (IOException e) {
-                System.err.println("Failed to receive requests from users: " + e.getMessage());
+                Logback.logger.error("Failed to receive requests from users: " + e.getMessage());
                 continue;
             }
             catch (ClassNotFoundException e) {
-                System.err.println("Failed to deserialize requests: " + e.getMessage());
+                Logback.logger.error("Failed to deserialize requests: " + e.getMessage());
                 continue;
             }
 
@@ -47,7 +47,7 @@ public class RequestHandler {
                     networkManager.sendResponse(user, response);
                 } 
                 catch (IOException e) {
-                    System.err.println("Failed to send response to user: " + e.getMessage());
+                    Logback.logger.error("Failed to send response to " + user + ": " + e.getMessage());
                 }
             }
         }

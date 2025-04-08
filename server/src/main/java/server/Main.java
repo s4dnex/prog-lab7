@@ -7,10 +7,7 @@ import java.util.Scanner;
 
 import server.json.JsonHandler;
 import server.network.NetworkManager;
-import server.utils.Collection;
-import server.utils.Invoker;
-import server.utils.Logback;
-import server.utils.RequestHandler;
+import server.utils.*;
 import shared.io.*;
 import shared.utils.*;
 
@@ -41,6 +38,7 @@ public class Main {
             NetworkManager networkManager = new NetworkManager(dataBuilder.getServerPort());
             Invoker invoker = new Invoker(collection);
             RequestHandler requestHandler = new RequestHandler(invoker, networkManager);
+            Runtime.getRuntime().addShutdownHook(new Thread(new ExitSaver(collection, fileHandler, console, networkManager)));
 
             requestHandler.enable();
         }
