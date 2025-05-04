@@ -14,67 +14,58 @@ import shared.commands.Test;
 import shared.network.*;
 
 public class NetworkManager implements AutoCloseable {
-    private final DatagramSocket clientSocket;
-    private final SocketAddress serverAddress;
+  private final DatagramSocket clientSocket;
+  private final SocketAddress serverAddress;
 
-    public NetworkManager(SocketAddress serverAddress) throws IOException {
-        this.serverAddress = serverAddress;
-        
-        clientSocket = new DatagramSocket();
-        clientSocket.setSoTimeout(5000);
+  public NetworkManager(SocketAddress serverAddress) throws IOException {
+    this.serverAddress = serverAddress;
 
-        if (!checkConnection()) {
-            throw new ConnectException("Failed to connect to the server");
-        }
-    }
+    clientSocket = new DatagramSocket();
+    clientSocket.setSoTimeout(5000);
 
-    public void send(Request request) throws IOException {
-        try (
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            ObjectOutputStream out = new ObjectOutputStream(bytes)
-        ) {
-            out.writeObject(request);
-            byte[] data = bytes.toByteArray();
-            DatagramPacket packet = new DatagramPacket(data, data.length, serverAddress);
-            clientSocket.send(packet);
-        } 
-        catch (SocketTimeoutException e) {
-            throw new SocketTimeoutException("Lost connection to the server");
-        } 
-        catch (IOException e) {
-            throw new IOException("Failed to send a request", e);
-        }
+    if (!checkConnection()) {
+      throw new ConnectException("Failed to connect to the server");
     }
+  }
 
-    public Response receive() throws IOException {
-        DatagramPacket packet = new DatagramPacket(new byte[2048], 2048);
-        clientSocket.receive(packet);
-        try (
-            ByteArrayInputStream bytes = new ByteArrayInputStream(packet.getData());
-            ObjectInputStream in = new ObjectInputStream(bytes)
-        ) {
-            return (Response) in.readObject();
-        } 
-        catch (SocketTimeoutException e) {
-            throw new SocketTimeoutException("Lost connection to the server");
-        } 
-        catch (IOException|ClassNotFoundException e) {
-            throw new IOException("Failed to receive a response", e);
-        }
+  public void send(Request request) throws IOException {
+    try (ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        ObjectOutputStream out = new ObjectOutputStream(bytes)) {
+      out.writeObject(request);
+      byte[] data = bytes.toByteArray();
+      DatagramPacket packet = new DatagramPacket(data, data.length, serverAddress);
+      clientSocket.send(packet);
+    } catch (SocketTimeoutException e) {
+      throw new SocketTimeoutException("Lost connection to the server");
+    } catch (IOException e) {
+      throw new IOException("Failed to send a request", e);
     }
-    
-    private boolean checkConnection() throws IOException {
-        try {
-            send(new Request(new Test(), new String[0]));
-            return receive().isSuccess();    
-        }
-        catch (IOException e) {
-            return false;
-        }
-    }
+  }
 
-    @Override
-    public void close() throws IOException {
-        clientSocket.close();
+  public Response receive() throws IOException {
+    DatagramPacket packet = new DatagramPacket(new byte[2048], 2048);
+    clientSocket.receive(packet);
+    try (ByteArrayInputStream bytes = new ByteArrayInputStream(packet.getData());
+        ObjectInputStream in = new ObjectInputStream(bytes)) {
+      return (Response) in.readObject();
+    } catch (SocketTimeoutException e) {
+      throw new SocketTimeoutException("Lost connection to the server");
+    } catch (IOException | ClassNotFoundException e) {
+      throw new IOException("Failed to receive a response", e);
     }
+  }
+
+  private boolean checkConnection() throws IOException {
+    try {
+      send(new Request(new Test(), new String[0]));
+      return receive().isSuccess();
+    } catch (IOException e) {
+      return false;
+    }
+  }
+
+  @Override
+  public void close() throws IOException {
+    clientSocket.close();
+  }
 }

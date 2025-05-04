@@ -1,10 +1,9 @@
 package shared.data;
 
 public enum HairColor {
-    RED,
-    ORANGE,
-    BROWN;
+  RED,
+  ORANGE,
+  BROWN;
 
-    
-    private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 }
