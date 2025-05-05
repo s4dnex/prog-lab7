@@ -22,6 +22,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.12.1")
     implementation("ch.qos.logback:logback-classic:1.4.7")
     implementation("ch.qos.logback:logback-core:1.4.7")
+    implementation("org.postgresql:postgresql:42.7.5")
     implementation(project(":shared"))
 }
 
