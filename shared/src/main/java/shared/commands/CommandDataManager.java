@@ -15,10 +15,11 @@ public class CommandDataManager {
     register(new Help());
     register(new History());
     register(new Info());
+    register(new Login());
     register(new PrintFieldAscendingDifficulty());
     register(new PrintFieldDescendingAuthor());
+    register(new Register());
     register(new RemoveById());
-    register(new RemoveLower());
     register(new Show());
     register(new SumOfMinimalPoint());
     register(new Test());

@@ -4,9 +4,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Logback {
-    public static final Logger logger = LoggerFactory.getLogger("Server");
+  private Logback() {}
 
-    private Logback() {
+  public static Logger getLogger() {
+    return LoggerFactory.getLogger("[Server]");
+  }
 
-    }
+  public static Logger getLogger(String name) {
+    return LoggerFactory.getLogger("[Server/" + name + "]");
+  }
 }

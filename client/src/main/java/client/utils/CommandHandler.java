@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import shared.commands.CommandData;
 import shared.commands.CommandDataManager;
-import shared.data.LabWork;
+import shared.data.Labwork;
 import shared.network.*;
 import shared.utils.Console;
 import shared.utils.DataBuilder;
@@ -17,17 +17,23 @@ import shared.utils.DataBuilder;
 /** Class to register commands and invoke their execution. */
 public class CommandHandler {
   private final Console console;
-  private final NetworkManager networkManager;
+  private final SessionManager sessionManager;
   private final DataBuilder dataBuilder;
   private final Map<String, Command> commands;
+  private final NetworkManager networkManager;
 
   /**
    * @param console Class to handle input and output
    * @param dataBuilder Class to build data
    * @param networkManager Class to handle network connection
    */
-  public CommandHandler(Console console, DataBuilder dataBuilder, NetworkManager networkManager) {
+  public CommandHandler(
+      Console console,
+      SessionManager sessionManager,
+      DataBuilder dataBuilder,
+      NetworkManager networkManager) {
     this.console = console;
+    this.sessionManager = sessionManager;
     this.dataBuilder = dataBuilder;
     this.networkManager = networkManager;
     this.commands = new HashMap<>();
@@ -90,12 +96,17 @@ public class CommandHandler {
   }
 
   public Request createRequest(CommandData command, String[] args) {
-    if (command.requiresObject()) {
-      LabWork labWork = dataBuilder.buildLabWork();
-      return new Request(command, args, labWork);
+    if (command.getName().equals("login") || command.getName().equals("register")) {
+      sessionManager.setSession(sessionManager.createSession());
     }
 
-    return new Request(command, args);
+    if (command.requiresObject()) {
+      Labwork labWork = dataBuilder.buildLabWork();
+      labWork.setOwner(sessionManager.getSession().getUsername());
+      return new Request(sessionManager.getSession(), command, args, labWork);
+    }
+
+    return new Request(sessionManager.getSession(), command, args);
   }
 
   public Response sendAndReceive(Request request) throws IOException {

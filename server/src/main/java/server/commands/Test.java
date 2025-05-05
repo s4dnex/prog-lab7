@@ -1,5 +1,6 @@
 package server.commands;
 
+import shared.network.Request;
 import shared.network.Response;
 
 public class Test extends Command {
@@ -10,7 +11,7 @@ public class Test extends Command {
   }
 
   @Override
-  public Response execute(String[] args, Object obj) {
+  public Response execute(Request request) {
     return new Response(true, "Request from client was received and processed successfully.");
   }
 }

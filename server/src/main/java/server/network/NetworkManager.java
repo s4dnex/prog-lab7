@@ -21,7 +21,7 @@ public class NetworkManager implements AutoCloseable {
     channel.configureBlocking(false);
     selector = Selector.open();
     channel.register(selector, SelectionKey.OP_READ);
-    Logback.logger.info("Server started on port " + port);
+    Logback.getLogger().info("Server started on port " + port);
   }
 
   /** Get all current requests from users. */
@@ -34,7 +34,7 @@ public class NetworkManager implements AutoCloseable {
 
     while (iterator.hasNext()) {
       SelectionKey key = iterator.next();
-      Logback.logger.info("Received request from user");
+      Logback.getLogger().info("Received request from user");
       if (key.isReadable()) {
         buffer.clear();
         SocketAddress clientAddress = channel.receive(buffer);
@@ -45,7 +45,7 @@ public class NetworkManager implements AutoCloseable {
               ObjectInputStream in = new ObjectInputStream(bytes)) {
             Request request = (Request) in.readObject();
             requests.put(clientAddress, request);
-            Logback.logger.info("Received " + request + " from " + clientAddress);
+            Logback.getLogger().info("Received " + request + " from " + clientAddress);
           }
         }
       }
@@ -64,13 +64,13 @@ public class NetworkManager implements AutoCloseable {
       byte[] responseBytes = bytes.toByteArray();
       ByteBuffer responseBuffer = ByteBuffer.wrap(responseBytes);
       channel.send(responseBuffer, clientAddress);
-      Logback.logger.info("Sent " + response + " to " + clientAddress);
+      Logback.getLogger().info("Sent " + response + " to " + clientAddress);
     }
   }
 
   @Override
   public void close() throws IOException {
-    Logback.logger.info("Closing server's channel and selector...");
+    Logback.getLogger().info("Closing server's channel and selector...");
     channel.close();
     selector.close();
   }

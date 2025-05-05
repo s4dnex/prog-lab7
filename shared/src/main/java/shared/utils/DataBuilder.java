@@ -15,6 +15,34 @@ public class DataBuilder {
     this.console = console;
   }
 
+  public String getUsername() {
+    while (true) {
+      try {
+        String login = getString("Enter your username: ");
+        if (login == null || login.isBlank()) {
+          throw new IllegalArgumentException();
+        }
+        return login;
+      } catch (IllegalArgumentException e) {
+        handleException("Username cannot be null or empty!");
+      }
+    }
+  }
+
+  public String getPassword() {
+    while (true) {
+      try {
+        String password = getString("Enter your password: ");
+        if (password == null || password.isBlank()) {
+          throw new IllegalArgumentException();
+        }
+        return password;
+      } catch (IllegalArgumentException e) {
+        handleException("Password cannot be null or empty!");
+      }
+    }
+  }
+
   public InetAddress getServerAddress() {
     while (true) {
       try {
@@ -46,18 +74,18 @@ public class DataBuilder {
 
         return port;
       } catch (IllegalArgumentException e) {
-        handleException("Invalid port, please enter a valid number (1 - 65535).");
+        handleException("Invalid port, please enter a valid number [1 - 65535].");
       }
     }
   }
 
   /**
-   * Method to set fields and build {@link LabWork}.
+   * Method to set fields and build {@link Labwork}.
    *
    * @return LabWork instance
    */
-  public LabWork buildLabWork() {
-    LabWork.Builder lwBuilder = new LabWork.Builder();
+  public Labwork buildLabWork() {
+    Labwork.Builder lwBuilder = new Labwork.Builder();
 
     while (true) {
       try {

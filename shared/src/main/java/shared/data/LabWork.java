@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-public class LabWork implements Comparable<LabWork>, Serializable {
+public class Labwork implements Comparable<Labwork>, Serializable {
   private static final long serialVersionUID = 1L;
   private Long id; // != null, > 0, unique, auto
   private String name; // != null, != empty
@@ -13,11 +13,12 @@ public class LabWork implements Comparable<LabWork>, Serializable {
   private Long minimalPoint; // > 0
   private Difficulty difficulty; // != null
   private Person author;
+  private String owner; // != null, != empty
 
   /**
    * @param builder {@link Builder}
    */
-  public LabWork(LabWork.Builder builder) {
+  public Labwork(Labwork.Builder builder) {
     this.name = builder.name;
     this.coordinates = builder.coordinates;
     this.minimalPoint = builder.minimalPoint;
@@ -55,8 +56,21 @@ public class LabWork implements Comparable<LabWork>, Serializable {
     return author;
   }
 
+  public String getOwner() {
+    return owner;
+  }
+
   public void setId(long id) {
     this.id = id;
+  }
+
+  public void setOwner(String owner) {
+    this.owner = owner;
+  }
+
+  public static boolean validateId(Long id) {
+    if (id == null || id <= 0) return false;
+    return true;
   }
 
   public static boolean validateName(String name) {
@@ -84,7 +98,7 @@ public class LabWork implements Comparable<LabWork>, Serializable {
   }
 
   @Override
-  public int compareTo(LabWork labWork) {
+  public int compareTo(Labwork labWork) {
     if (this.difficulty == labWork.difficulty) {
       if (this.minimalPoint == null && labWork.minimalPoint == null) return 0;
       else if (this.minimalPoint == null) return -1;
@@ -111,14 +125,17 @@ public class LabWork implements Comparable<LabWork>, Serializable {
         + difficulty
         + ", author="
         + author
-        + '}';
+        + ", owner=\""
+        + owner
+        + "\""
+        + "}";
   }
 
   @Override
   public boolean equals(Object obj) {
     if (this.getClass() != obj.getClass()) return false;
 
-    LabWork lw = (LabWork) obj;
+    Labwork lw = (Labwork) obj;
     return this.name.equals(lw.name)
         && this.coordinates.equals(lw.coordinates)
         && this.minimalPoint.equals(lw.minimalPoint)
@@ -131,15 +148,19 @@ public class LabWork implements Comparable<LabWork>, Serializable {
     return Objects.hash(name, coordinates, minimalPoint, difficulty, author);
   }
 
-  /** Class to build {@link LabWork}. */
+  /** Class to build {@link Labwork}. */
   public static class Builder {
+    private Long id;
     private String name;
     private Coordinates coordinates;
     private Long minimalPoint;
     private Difficulty difficulty;
     private Person author;
 
-    // METHODS
+    public Builder setId(Long id) {
+      this.id = id;
+      return this;
+    }
 
     /**
      * Sets value of field {@code name}.
@@ -212,16 +233,16 @@ public class LabWork implements Comparable<LabWork>, Serializable {
     }
 
     /**
-     * Returns new {@link LabWork} instance with set fields.
+     * Returns new {@link Labwork} instance with set fields.
      *
-     * @return {@link LabWork}
+     * @return {@link Labwork}
      */
-    public LabWork build() {
+    public Labwork build() {
       if (validateName(name)
           && validateCoordinates(coordinates)
           && validateMinimalPoint(minimalPoint)
           && validateDifficulty(difficulty)
-          && validateAuthor(author)) return new LabWork(this);
+          && validateAuthor(author)) return new Labwork(this);
       throw new IllegalArgumentException("Invalid LabWork parameters");
     }
   }

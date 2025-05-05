@@ -18,7 +18,5 @@ public class SystemOutput implements OutputHandler {
   }
 
   @Override
-  public void close() {
-    System.out.close();
-  }
+  public void close() {}
 }

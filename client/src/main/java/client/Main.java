@@ -20,8 +20,15 @@ public class Main {
           new NetworkManager(
               new InetSocketAddress(dataBuilder.getServerAddress(), dataBuilder.getServerPort()));
       console.println("Connection with server is established!");
-      CommandHandler invoker = new CommandHandler(console, dataBuilder, networkManager);
+      SessionManager sessionManager = new SessionManager(console, dataBuilder);
+      CommandHandler invoker =
+          new CommandHandler(console, sessionManager, dataBuilder, networkManager);
       CommandReader commandReader = new CommandReader(console, invoker);
+      if (!sessionManager.initialize()) {
+        invoker.handle("register");
+      } else {
+        invoker.handle("login");
+      }
       commandReader.enable();
     } catch (ConnectException e) {
       System.err.println(

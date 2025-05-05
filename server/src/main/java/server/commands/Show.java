@@ -2,7 +2,8 @@ package server.commands;
 
 import java.util.TreeSet;
 import server.utils.Collection;
-import shared.data.LabWork;
+import shared.data.Labwork;
+import shared.network.Request;
 import shared.network.Response;
 
 /** Command to show collection elements. */
@@ -15,8 +16,8 @@ public class Show extends Command {
   }
 
   @Override
-  public Response execute(String[] args, Object obj) {
-    TreeSet<LabWork> labWorks = collection.asTreeSet();
+  public Response execute(Request request) {
+    TreeSet<Labwork> labWorks = collection.asTreeSet();
     if (labWorks.size() == 0) {
       return new Response(true, "Collection is empty!");
     }
@@ -24,7 +25,7 @@ public class Show extends Command {
     long i = 1;
     StringBuilder msg =
         new StringBuilder("The collection contains " + labWorks.size() + " element(s):\n");
-    for (LabWork lw : labWorks) {
+    for (Labwork lw : labWorks) {
       msg.append((i++) + ". " + lw + "\n");
     }
     return new Response(true, msg.toString());

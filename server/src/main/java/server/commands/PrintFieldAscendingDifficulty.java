@@ -1,6 +1,7 @@
 package server.commands;
 
 import server.utils.Collection;
+import shared.network.Request;
 import shared.network.Response;
 
 /** Command to print element's difficulties in ascending order. */
@@ -13,7 +14,7 @@ public class PrintFieldAscendingDifficulty extends Command {
   }
 
   @Override
-  public Response execute(String[] args, Object obj) {
+  public Response execute(Request request) {
     var fields = collection.getAscendingDifficulty();
 
     if (fields.isEmpty()) {

@@ -1,6 +1,7 @@
 package server.commands;
 
 import server.utils.Collection;
+import shared.network.Request;
 import shared.network.Response;
 
 /** Command to print sum of minimal points of every element. */
@@ -13,7 +14,7 @@ public class SumOfMinimalPoint extends Command {
   }
 
   @Override
-  public Response execute(String[] args, Object obj) {
+  public Response execute(Request request) {
     return new Response(true, "Sum of the minimal points: " + collection.sumOfMinimalPoint());
   }
 }

@@ -1,6 +1,8 @@
 package server.commands;
 
 import java.io.Serializable;
+
+import shared.network.Request;
 import shared.network.Response;
 
 public abstract class Command implements Serializable {
@@ -15,7 +17,7 @@ public abstract class Command implements Serializable {
     return name;
   }
 
-  public abstract Response execute(String[] args, Object obj);
+  public abstract Response execute(Request request);
 
   @Override
   public String toString() {

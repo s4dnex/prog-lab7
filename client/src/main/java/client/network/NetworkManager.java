@@ -43,7 +43,7 @@ public class NetworkManager implements AutoCloseable {
   }
 
   public Response receive() throws IOException {
-    DatagramPacket packet = new DatagramPacket(new byte[2048], 2048);
+    DatagramPacket packet = new DatagramPacket(new byte[8192], 8192);
     clientSocket.receive(packet);
     try (ByteArrayInputStream bytes = new ByteArrayInputStream(packet.getData());
         ObjectInputStream in = new ObjectInputStream(bytes)) {
@@ -57,7 +57,7 @@ public class NetworkManager implements AutoCloseable {
 
   private boolean checkConnection() throws IOException {
     try {
-      send(new Request(new Test(), new String[0]));
+      send(new Request(null, new Test(), new String[0]));
       return receive().isSuccess();
     } catch (IOException e) {
       return false;

@@ -1,6 +1,7 @@
 package server.commands;
 
 import shared.commands.*;
+import shared.network.Request;
 import shared.network.Response;
 import shared.utils.Formatter;
 
@@ -12,7 +13,7 @@ public class Help extends Command {
   }
 
   @Override
-  public Response execute(String[] args, Object obj) {
+  public Response execute(Request request) {
     int minColumnWidth =
         Math.max(11, CommandDataManager.keys().stream().mapToInt(String::length).max().orElse(11));
 

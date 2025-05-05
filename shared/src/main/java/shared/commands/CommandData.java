@@ -9,12 +9,23 @@ public abstract class CommandData implements Comparable<CommandData>, Serializab
   protected final String[] args;
   protected final boolean requiresObject;
   protected final String description;
+  protected final boolean requiresAuth;
 
-  public CommandData(String name, String[] args, boolean requiresObject, String description) {
+  public CommandData(
+      String name,
+      String[] args,
+      boolean requiresObject,
+      String description,
+      boolean requiresAuth) {
     this.name = name;
     this.args = args;
     this.requiresObject = requiresObject;
     this.description = description;
+    this.requiresAuth = requiresAuth;
+  }
+
+  public CommandData(String name, String[] args, boolean requiresObject, String description) {
+    this(name, args, requiresObject, description, true);
   }
 
   /**
@@ -53,6 +64,15 @@ public abstract class CommandData implements Comparable<CommandData>, Serializab
     return description;
   }
 
+  /**
+   * Returns true if {@link CommandData} requires authentication to be executed.
+   *
+   * @return true if requires authentication, false otherwise
+   */
+  public boolean requiresAuth() {
+    return requiresAuth;
+  }
+
   @Override
   public int compareTo(CommandData command) {
     return name.compareTo(command.getName());
@@ -79,6 +99,8 @@ public abstract class CommandData implements Comparable<CommandData>, Serializab
         + requiresObject
         + ", description="
         + description
+        + ", requiresAuth="
+        + requiresAuth
         + "}";
   }
 }
