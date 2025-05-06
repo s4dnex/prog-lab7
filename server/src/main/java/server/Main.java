@@ -1,13 +1,19 @@
 package server;
 
+import java.net.SocketAddress;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
 import java.util.Scanner;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import server.database.DatabaseConnector;
 import server.database.DatabaseManager;
 import server.database.QueryResultHandler;
 import server.network.NetworkManager;
 import server.utils.*;
 import shared.io.*;
+import shared.network.Request;
+import shared.network.Response;
 import shared.utils.*;
 
 public class Main {
@@ -22,7 +28,16 @@ public class Main {
       DatabaseManager databaseManager = new DatabaseManager(new DatabaseConnector().connect());
       PasswordManager passwordManager = new PasswordManager();
       Invoker invoker = new Invoker(collection, databaseManager, passwordManager);
-      RequestHandler requestHandler = new RequestHandler(invoker, networkManager);
+
+      BlockingQueue<SimpleEntry<SocketAddress, Request>> requestQueue = new LinkedBlockingQueue<>();
+      BlockingQueue<SimpleEntry<SocketAddress, Response>> responseQueue =
+          new LinkedBlockingQueue<>();
+
+      RequestHandler requestHandler =
+          new RequestHandler(invoker, networkManager, requestQueue, responseQueue, 10);
+      Responder responder = new Responder(responseQueue, networkManager);
+      new Thread(responder).start();
+
       Runtime.getRuntime()
           .addShutdownHook(
               new Thread(new ExitSaver(collection, console, networkManager, databaseManager)));

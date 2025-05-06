@@ -1,9 +1,8 @@
 package server.utils;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import org.slf4j.Logger;
 import server.commands.*;
 import server.database.DatabaseManager;
 import shared.network.Request;
@@ -13,8 +12,9 @@ import shared.network.Response;
 public class Invoker {
   private final DatabaseManager databaseManager;
   private final PasswordManager passwordManager;
-  private final Queue<Command> executedCommands;
-  private final Map<String, Command> commands;
+  private final ConcurrentLinkedQueue<Command> executedCommands;
+  private final ConcurrentHashMap<String, Command> commands;
+  private final Logger logger = Logback.getLogger("Invoker");
 
   /**
    * @param console Class to handle input and output
@@ -25,8 +25,8 @@ public class Invoker {
       Collection collection, DatabaseManager databaseManager, PasswordManager passwordManager) {
     this.databaseManager = databaseManager;
     this.passwordManager = passwordManager;
-    executedCommands = new LinkedList<Command>();
-    commands = new HashMap<String, Command>();
+    executedCommands = new ConcurrentLinkedQueue<Command>();
+    commands = new ConcurrentHashMap<String, Command>();
 
     commands.put(new shared.commands.Add().getName(), new Add(collection, databaseManager));
     commands.put(
@@ -70,7 +70,7 @@ public class Invoker {
     }
 
     if (commands.containsKey(commandName)) {
-      Logback.getLogger().info("Executing command '" + commandName + "'");
+      logger.info("Executing command '" + commandName + "'");
       try {
         Response response = commands.get(commandName).execute(request);
 
@@ -82,7 +82,7 @@ public class Invoker {
         return new Response(false, e.getMessage());
       }
     } else {
-      Logback.getLogger().error("Command '" + commandName + "' not found.");
+      logger.error("Command '" + commandName + "' not found.");
       return new Response(false, "Command not found. Type 'help' to see available commands.");
     }
   }

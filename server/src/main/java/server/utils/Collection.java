@@ -2,16 +2,16 @@ package server.utils;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.TreeSet;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.stream.LongStream;
 import shared.data.*;
 
 /** Class to work with collection. */
 public class Collection {
-  private TreeSet<Labwork> labWorks;
+  private final ConcurrentSkipListSet<Labwork> labWorks;
 
   public Collection() {
-    labWorks = new TreeSet<Labwork>();
+    labWorks = new ConcurrentSkipListSet<Labwork>();
   }
 
   public Collection(Iterable<Labwork> labWorks) {
@@ -42,12 +42,12 @@ public class Collection {
   }
 
   /**
-   * Returns collection as {@link TreeSet}
+   * Returns collection as {@link List}
    *
    * @return collection
    */
-  public TreeSet<Labwork> asTreeSet() {
-    return labWorks;
+  public List<Labwork> asList() {
+    return labWorks.stream().toList();
   }
 
   /**

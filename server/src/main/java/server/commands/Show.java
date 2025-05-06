@@ -1,6 +1,6 @@
 package server.commands;
 
-import java.util.TreeSet;
+import java.util.List;
 import server.utils.Collection;
 import shared.data.Labwork;
 import shared.network.Request;
@@ -17,7 +17,7 @@ public class Show extends Command {
 
   @Override
   public Response execute(Request request) {
-    TreeSet<Labwork> labWorks = collection.asTreeSet();
+    List<Labwork> labWorks = collection.asList();
     if (labWorks.size() == 0) {
       return new Response(true, "Collection is empty!");
     }

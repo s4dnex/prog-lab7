@@ -51,7 +51,10 @@ public class QueryResultHandler {
             new Person.Builder()
                 .setName(data.getString("person_name"))
                 .setWeight(data.getFloat("person_weight"))
-                .setEyeColor(Enum.valueOf(EyeColor.class, data.getString("person_eye_color")))
+                .setEyeColor(
+                    data.getString("person_eye_color") == null
+                        ? null
+                        : Enum.valueOf(EyeColor.class, data.getString("person_eye_color")))
                 .setHairColor(Enum.valueOf(HairColor.class, data.getString("person_hair_color")))
                 .setLocation(location)
                 .build();
@@ -65,6 +68,7 @@ public class QueryResultHandler {
               .setMinimalPoint(data.getLong("minimal_point"))
               .setDifficulty(Enum.valueOf(Difficulty.class, data.getString("difficulty")))
               .setAuthor(author)
+              .setOwner(data.getString("owner"))
               .build();
     }
 

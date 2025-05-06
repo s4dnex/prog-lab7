@@ -6,6 +6,7 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.util.*;
+import org.slf4j.Logger;
 import server.utils.Logback;
 import shared.network.Request;
 import shared.network.Response;
@@ -14,6 +15,7 @@ public class NetworkManager implements AutoCloseable {
   private final DatagramChannel channel;
   private final Selector selector;
   private final ByteBuffer buffer = ByteBuffer.allocate(8192);
+  private final Logger logger = Logback.getLogger("NetworkManager");
 
   public NetworkManager(int port) throws IOException {
     channel = DatagramChannel.open();
@@ -28,13 +30,15 @@ public class NetworkManager implements AutoCloseable {
   public LinkedHashMap<SocketAddress, Request> receiveRequests()
       throws IOException, ClassNotFoundException {
     LinkedHashMap<SocketAddress, Request> requests = new LinkedHashMap<>();
-    selector.selectNow();
+    if (selector.select(1000) == 0) {
+      return requests;
+    }
     Set<SelectionKey> selectedKeys = selector.selectedKeys();
     Iterator<SelectionKey> iterator = selectedKeys.iterator();
 
     while (iterator.hasNext()) {
       SelectionKey key = iterator.next();
-      Logback.getLogger().info("Received request from user");
+      logger.info("Got new request, trying to handle it...");
       if (key.isReadable()) {
         buffer.clear();
         SocketAddress clientAddress = channel.receive(buffer);
@@ -45,7 +49,7 @@ public class NetworkManager implements AutoCloseable {
               ObjectInputStream in = new ObjectInputStream(bytes)) {
             Request request = (Request) in.readObject();
             requests.put(clientAddress, request);
-            Logback.getLogger().info("Received " + request + " from " + clientAddress);
+            logger.info("Successfully received " + request + " from " + clientAddress);
           }
         }
       }
@@ -58,19 +62,20 @@ public class NetworkManager implements AutoCloseable {
 
   /** Send response to the user. */
   public void sendResponse(SocketAddress clientAddress, Response response) throws IOException {
+    logger.info("Sending " + clientAddress + " to " + response);
     try (ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         ObjectOutputStream out = new ObjectOutputStream(bytes)) {
       out.writeObject(response);
       byte[] responseBytes = bytes.toByteArray();
       ByteBuffer responseBuffer = ByteBuffer.wrap(responseBytes);
       channel.send(responseBuffer, clientAddress);
-      Logback.getLogger().info("Sent " + response + " to " + clientAddress);
+      logger.info("Successfully sent " + response + " to " + clientAddress);
     }
   }
 
   @Override
   public void close() throws IOException {
-    Logback.getLogger().info("Closing server's channel and selector...");
+    logger.info("Closing server's channel and selector...");
     channel.close();
     selector.close();
   }

@@ -22,95 +22,147 @@ public class DatabaseManager {
   public void initialize() throws SQLException {
     logger.info("Initializing database...");
     Statement st = connection.createStatement();
-    st.executeUpdate("CREATE SEQUENCE IF NOT EXISTS labworks_id_seq START WITH 1 INCREMENT BY 1");
     st.executeUpdate(
-        "CREATE TABLE IF NOT EXISTS users ("
-            + "username TEXT PRIMARY KEY,"
-            + "hash_password TEXT NOT NULL,"
-            + "salt TEXT NOT NULL"
-            + ")");
+        """
+        CREATE SEQUENCE IF NOT EXISTS labworks_id_seq
+        START WITH 1
+        INCREMENT BY 1
+        """);
+
+    st.executeUpdate(
+        """
+        CREATE TABLE IF NOT EXISTS users (
+            username      TEXT PRIMARY KEY,
+            hash_password TEXT NOT NULL,
+            salt          TEXT NOT NULL
+        )
+        """);
+
     try {
       st.executeUpdate(
-          "CREATE TYPE difficulty_enum AS ENUM ('VERY_EASY', 'EASY', 'NORMAL', 'HARD')");
+          """
+          CREATE TYPE difficulty_enum AS ENUM (
+              'VERY_EASY',
+              'EASY',
+              'NORMAL',
+              'HARD'
+          )
+          """);
     } catch (SQLException e) {
-      if (!e.getSQLState().equals("42710")) { // Код ошибки "type already exists"
-        throw e; // Иные ошибки — пробрасываем
+      if (!e.getSQLState().equals("42710")) {
+        throw e;
       }
     }
+
     try {
       st.executeUpdate(
-          "CREATE TYPE eye_color_enum AS ENUM ('GREEN', 'RED', 'BLACK', 'WHITE', 'BROWN')");
+          """
+          CREATE TYPE eye_color_enum AS ENUM (
+              'GREEN',
+              'RED',
+              'BLACK',
+              'WHITE',
+              'BROWN'
+          )
+          """);
     } catch (SQLException e) {
-      if (!e.getSQLState().equals("42710")) { // Код ошибки "type already exists"
-        throw e; // Иные ошибки — пробрасываем
+      if (!e.getSQLState().equals("42710")) {
+        throw e;
       }
     }
+
     try {
-      st.executeUpdate("CREATE TYPE hair_color_enum AS ENUM (" + "'RED', 'ORANGE', 'BROWN'" + ")");
-
+      st.executeUpdate(
+          """
+          CREATE TYPE hair_color_enum AS ENUM (
+              'RED',
+              'ORANGE',
+              'BROWN'
+          )
+          """);
     } catch (SQLException e) {
-      if (!e.getSQLState().equals("42710")) { // Код ошибки "type already exists"
-        throw e; // Иные ошибки — пробрасываем
+      if (!e.getSQLState().equals("42710")) {
+        throw e;
       }
     }
-    st.executeUpdate(
-        "CREATE TABLE IF NOT EXISTS coordinates ("
-            + "coords_id BIGINT PRIMARY KEY,"
-            + "coords_x INTEGER NOT NULL,"
-            + "coords_y REAL NOT NULL"
-            + ")");
-    st.executeUpdate(
-        "CREATE TABLE IF NOT EXISTS locations ("
-            + "loc_id BIGINT PRIMARY KEY,"
-            + "loc_x DOUBLE PRECISION NOT NULL,"
-            + "loc_y DOUBLE PRECISION NOT NULL,"
-            + "loc_z DOUBLE PRECISION NOT NULL,"
-            + "loc_name TEXT NOT NULL"
-            + ")");
-    st.executeUpdate(
-        "CREATE TABLE IF NOT EXISTS persons ("
-            + "person_id BIGINT PRIMARY KEY,"
-            + "person_name TEXT NOT NULL,"
-            + "person_weight REAL CHECK (person_weight > 0),"
-            + "person_eye_color eye_color_enum,"
-            + "person_hair_color hair_color_enum NOT NULL,"
-            + "loc_id BIGINT NOT NULL REFERENCES locations(loc_id) ON DELETE NO ACTION"
-            + ")");
-    st.executeUpdate(
-        "CREATE TABLE IF NOT EXISTS labworks ("
-            + "lab_id BIGINT PRIMARY KEY DEFAULT nextval('labworks_id_seq'),"
-            + "lab_name TEXT NOT NULL,"
-            + "coords_id BIGINT NOT NULL REFERENCES coordinates(coords_id) ON DELETE NO ACTION,"
-            + "creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
-            + "minimal_point BIGINT CHECK (minimal_point > 0),"
-            + "difficulty difficulty_enum NOT NULL,"
-            + "person_id BIGINT REFERENCES persons(person_id) ON DELETE SET NULL,"
-            + "owner TEXT NOT NULL"
-            + ")");
 
     st.executeUpdate(
-"""
-    CREATE OR REPLACE FUNCTION delete_related_labwork_data()
-    RETURNS TRIGGER AS $$
-    BEGIN
-        DELETE FROM coordinates WHERE coords_id = OLD.lab_id;
-
-        DELETE FROM locations WHERE loc_id = OLD.lab_id;
-
-        DELETE FROM persons WHERE person_id = OLD.lab_id;
-
-        RETURN NULL;
-    END;
-    $$ LANGUAGE plpgsql;
-""");
+        """
+        CREATE TABLE IF NOT EXISTS coordinates (
+            coords_id BIGINT PRIMARY KEY,
+            coords_x  INTEGER NOT NULL,
+            coords_y  REAL    NOT NULL
+        )
+        """);
 
     st.executeUpdate(
-"""
-    CREATE OR REPLACE TRIGGER after_labwork_delete
-    AFTER DELETE ON labworks
-    FOR EACH ROW
-    EXECUTE FUNCTION delete_related_labwork_data();
-""");
+        """
+        CREATE TABLE IF NOT EXISTS locations (
+            loc_id   BIGINT             PRIMARY KEY,
+            loc_x    DOUBLE PRECISION   NOT NULL,
+            loc_y    DOUBLE PRECISION   NOT NULL,
+            loc_z    DOUBLE PRECISION   NOT NULL,
+            loc_name TEXT               NOT NULL
+        )
+        """);
+
+    st.executeUpdate(
+        """
+        CREATE TABLE IF NOT EXISTS persons (
+            person_id       BIGINT               PRIMARY KEY,
+            person_name     TEXT                 NOT NULL,
+            person_weight   REAL  CHECK (person_weight > 0),
+            person_eye_color  eye_color_enum,
+            person_hair_color hair_color_enum    NOT NULL,
+            loc_id          BIGINT NOT NULL REFERENCES locations(loc_id) ON DELETE NO ACTION
+        )
+        """);
+
+    st.executeUpdate(
+        """
+        CREATE TABLE IF NOT EXISTS labworks (
+            lab_id         BIGINT PRIMARY KEY
+                             DEFAULT nextval('labworks_id_seq'),
+            lab_name       TEXT                 NOT NULL,
+            coords_id      BIGINT  NOT NULL
+                             REFERENCES coordinates(coords_id)
+                             ON DELETE NO ACTION,
+            creation_date  TIMESTAMP
+                             DEFAULT CURRENT_TIMESTAMP,
+            minimal_point  BIGINT CHECK (minimal_point > 0),
+            difficulty     difficulty_enum      NOT NULL,
+            person_id      BIGINT
+                             REFERENCES persons(person_id)
+                             ON DELETE SET NULL,
+            owner          TEXT                 NOT NULL
+        )
+        """);
+
+    st.executeUpdate(
+        """
+        CREATE OR REPLACE FUNCTION delete_related_labwork_data()
+        RETURNS TRIGGER AS $$
+        BEGIN
+            DELETE FROM coordinates WHERE coords_id = OLD.lab_id;
+
+            DELETE FROM persons WHERE person_id = OLD.lab_id;
+
+            DELETE FROM locations WHERE loc_id = OLD.lab_id;
+
+            RETURN NULL;
+        END;
+        $$ LANGUAGE plpgsql;
+        """);
+
+    st.executeUpdate("DROP TRIGGER IF EXISTS after_labwork_delete ON labworks");
+
+    st.executeUpdate(
+        """
+        CREATE TRIGGER after_labwork_delete
+        AFTER DELETE ON labworks
+        FOR EACH ROW
+        EXECUTE FUNCTION delete_related_labwork_data();
+        """);
   }
 
   public ResultSet getCollection() throws SQLException {
@@ -216,7 +268,11 @@ public class DatabaseManager {
     ps.setLong(1, id);
     ps.setString(2, labWork.getAuthor().getName());
     ps.setDouble(3, labWork.getAuthor().getWeight());
-    ps.setString(4, labWork.getAuthor().getEyeColor().toString());
+    if (labWork.getAuthor().getEyeColor() == null) {
+      ps.setNull(4, java.sql.Types.VARCHAR);
+    } else {
+      ps.setString(4, labWork.getAuthor().getEyeColor().toString());
+    }
     ps.setString(5, labWork.getAuthor().getHairColor().toString());
     if (addLocation(id, labWork)) {
       ps.setLong(6, id);
@@ -275,7 +331,11 @@ public class DatabaseManager {
     PreparedStatement ps = connection.prepareStatement(Statements.UPDATE_PERSON.toString());
     ps.setString(1, labWork.getAuthor().getName());
     ps.setDouble(2, labWork.getAuthor().getWeight());
-    ps.setString(3, labWork.getAuthor().getEyeColor().toString());
+    if (labWork.getAuthor().getEyeColor() == null) {
+      ps.setNull(3, java.sql.Types.VARCHAR);
+    } else {
+      ps.setString(3, labWork.getAuthor().getEyeColor().toString());
+    }
     ps.setString(4, labWork.getAuthor().getHairColor().toString());
     ps.setLong(5, id);
     ps.executeUpdate();
