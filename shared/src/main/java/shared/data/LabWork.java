@@ -19,12 +19,13 @@ public class Labwork implements Comparable<Labwork>, Serializable {
    * @param builder {@link Builder}
    */
   public Labwork(Labwork.Builder builder) {
+    this.id = builder.id;
     this.name = builder.name;
     this.coordinates = builder.coordinates;
     this.minimalPoint = builder.minimalPoint;
     this.difficulty = builder.difficulty;
     this.author = builder.author;
-
+    this.owner = builder.owner;
     this.creationDate = LocalDateTime.now();
   }
 
@@ -156,9 +157,15 @@ public class Labwork implements Comparable<Labwork>, Serializable {
     private Long minimalPoint;
     private Difficulty difficulty;
     private Person author;
+    private String owner;
 
     public Builder setId(Long id) {
       this.id = id;
+      return this;
+    }
+
+    public Builder setOwner(String owner) {
+      this.owner = owner;
       return this;
     }
 
