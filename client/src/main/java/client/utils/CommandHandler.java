@@ -71,7 +71,13 @@ public class CommandHandler {
     }
 
     if (commands.containsKey(commandName)) {
-      commands.get(commandName).execute(args);
+      var cmnd = commands.get(commandName);
+      if (args.length != cmnd.getArgs().length) {
+        console.println("Unexpected arguments occurred, please, try again.");
+        return;
+      }
+
+      cmnd.execute(args);
     }
 
     if (!CommandDataManager.has(commandName)) {
